@@ -2,7 +2,7 @@ extends CharacterBody3D
 
 const MOUSE_SENSITIVITY = 0.002
 const SPEED = 5.0
-const JUMP_FORCE = 8.0
+const JUMP_FORCE = 12.0
 const GRAVITY = 20.0
 const DASH_SPEED = 20.0
 const DASH_DURATION = 0.12
@@ -30,7 +30,7 @@ func get_input_direction(delta):
 		var right = transform.basis.x
 		direction = (right * input_dir.x + forward * input_dir.z).normalized()
 		
-		return direction
+	return direction
 
 enum PlayerState{
 	IDLE,
@@ -55,8 +55,7 @@ func _unhandled_input(event):
 		
 		pivot.rotation.x = clamp(pivot.rotation.x, deg_to_rad(-40), deg_to_rad(60) )
 
-func handle_movement_state(delta):
-	var direction = get_input_direction(delta)
+func handle_movement_state(delta, direction):
 	match current_movement_state:
 		PlayerState.IDLE:
 			handle_idle_state(delta)
@@ -70,19 +69,31 @@ func handle_movement_state(delta):
 			handle_dash_state(delta, direction)
 
 func handle_idle_state(delta):
+	velocity.x= 0
+	velocity.z = 0
+	if !is_on_floor():
+		current_movement_state = PlayerState.FALL
 	if Input.is_action_pressed("move_forward") or Input.is_action_pressed("move_backwards") or Input.is_action_pressed("move_right") or Input.is_action_pressed("move_left"):
 		current_movement_state = PlayerState.MOVE
-	if Input.is_action_just_pressed("dash") and dash_cooldown_left <= 0:
-		current_movement_state = PlayerState.DASH
+	if Input.is_action_just_pressed("jump") and is_on_floor():
+		velocity.y = JUMP_FORCE
+		current_movement_state = PlayerState.JUMP
+	
+	return Vector3.ZERO
 
 func handle_move_state(delta, direction):
-	velocity.x = direction.x * SPEED
-	velocity.z = direction.z * SPEED
+	if direction != Vector3.ZERO:
+		velocity.x = direction.x * SPEED
+		velocity.z = direction.z * SPEED
+	else:
+		current_movement_state = PlayerState.IDLE
 	
-func handle_dash_state(delta):
-	dash_timer = DASH_DURATION
-	dash_cooldown_left = DASH_COOLDOWN
-		
+	if Input.is_action_just_pressed("dash") and dash_cooldown_left <= 0:
+		dash_timer = DASH_DURATION
+		dash_cooldown_left = DASH_COOLDOWN
+		current_movement_state = PlayerState.DASH
+	
+func handle_dash_state(delta, direction):
 	if direction == Vector3.ZERO:
 		dash_direction = transform.basis.z.normalized()
 	else:
@@ -92,37 +103,28 @@ func handle_dash_state(delta):
 		velocity.x = dash_direction.x * DASH_SPEED
 		velocity.z = dash_direction.z * DASH_SPEED
 		dash_timer -= delta
+	if dash_timer <= 0.0:
+		current_movement_state = PlayerState.IDLE
+		
+func handle_jump_state(delta):
+	if velocity.y >= 0:
+		velocity.y -= 1
 	else:
-		velocity.x = direction.x * SPEED
-		velocity.z = direction.z * SPEED
+		current_movement_state = PlayerState.FALL
+
+func handle_fall_state(delta):
+	if !is_on_floor():
+		velocity.y -= GRAVITY * delta
+	else:
+		current_movement_state = PlayerState.IDLE
 			
 func _physics_process(delta):
 	if Input.is_action_just_pressed("close"):
 		get_tree().quit()
-		
-	if Input.is_action_just_pressed("dash") and dash_cooldown_left <= 0:
-		dash_timer = DASH_DURATION
-		dash_cooldown_left = DASH_COOLDOWN
-		
-		if direction == Vector3.ZERO:
-			dash_direction = transform.basis.z.normalized()
-		else:
-			dash_direction = direction
+	var movement_direction = get_input_direction(delta)
+	handle_movement_state(delta, movement_direction)
 	
-	if dash_timer > 0.0:
-		velocity.x = dash_direction.x * DASH_SPEED
-		velocity.z = dash_direction.z * DASH_SPEED
-		dash_timer -= delta
-	else:
-		velocity.x = direction.x * SPEED
-		velocity.z = direction.z * SPEED
-	
-	if is_on_floor():
-		if Input.is_action_pressed("jump"):
-			velocity.y = JUMP_FORCE
-	else:
-		velocity.y -= GRAVITY * delta
-	if dash_cooldown_left > 0:
+	if dash_cooldown_left > 0.0:
 		dash_cooldown_left -= delta
 	
 	move_and_slide()
