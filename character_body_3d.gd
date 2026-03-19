@@ -2,7 +2,7 @@ extends CharacterBody3D
 
 const MOUSE_SENSITIVITY = 0.002
 const SPEED = 5.0
-const JUMP_FORCE = 12.0
+const JUMP_FORCE = 8.0
 const GRAVITY = 20.0
 const DASH_SPEED = 20.0
 const DASH_DURATION = 0.12
@@ -36,7 +36,6 @@ enum PlayerState{
 	IDLE,
 	MOVE,
 	JUMP,
-	ATTACK,
 	FALL,
 	DASH,
 }
@@ -78,6 +77,10 @@ func handle_idle_state(delta):
 	if Input.is_action_just_pressed("jump") and is_on_floor():
 		velocity.y = JUMP_FORCE
 		current_movement_state = PlayerState.JUMP
+	if Input.is_action_just_pressed("dash") and dash_cooldown_left <= 0:
+		dash_timer = DASH_DURATION
+		dash_cooldown_left = DASH_COOLDOWN
+		current_movement_state = PlayerState.DASH
 	
 	return Vector3.ZERO
 
@@ -92,6 +95,10 @@ func handle_move_state(delta, direction):
 		dash_timer = DASH_DURATION
 		dash_cooldown_left = DASH_COOLDOWN
 		current_movement_state = PlayerState.DASH
+	
+	if Input.is_action_just_pressed("jump") and is_on_floor():
+		velocity.y = JUMP_FORCE
+		current_movement_state = PlayerState.JUMP
 	
 func handle_dash_state(delta, direction):
 	if direction == Vector3.ZERO:
@@ -108,7 +115,7 @@ func handle_dash_state(delta, direction):
 		
 func handle_jump_state(delta):
 	if velocity.y >= 0:
-		velocity.y -= 1
+		velocity.y -= GRAVITY * delta
 	else:
 		current_movement_state = PlayerState.FALL
 
@@ -117,7 +124,17 @@ func handle_fall_state(delta):
 		velocity.y -= GRAVITY * delta
 	else:
 		current_movement_state = PlayerState.IDLE
+enum AttackType{
+	LIGHT,
+	HEAVY,
+	CHARGED
+}
+var current_attack_state = AttackType.LIGHT
+func handle_attack_state(delta):
+	match current_attack_state:
+		AttackType.LIGHT:
 			
+
 func _physics_process(delta):
 	if Input.is_action_just_pressed("close"):
 		get_tree().quit()

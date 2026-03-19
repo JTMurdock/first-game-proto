@@ -27,25 +27,30 @@ data = PackedVector3Array(0, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0, 0.5, 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=356333674]
 transform = Transform3D(0.012296052, -0.9995757, 0.026402643, 0.42199627, 0.029125461, 0.9061296, -0.90651417, 0, 0.42217535, 0, 7.089134, 0)
 
-[node name="CharacterBody3D" type="CharacterBody3D" parent="." unique_id=1768421667]
+[node name="Player" type="CharacterBody3D" parent="." unique_id=1768421667]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.8375596, 0.7808962, -0.99951315)
 script = ExtResource("1_a202f")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="CharacterBody3D" unique_id=1522458242]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Player" unique_id=1522458242]
 shape = SubResource("CapsuleShape3D_a0tk4")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="CharacterBody3D" unique_id=1588832735]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Player" unique_id=1588832735]
 mesh = SubResource("CapsuleMesh_r3fl7")
 
-[node name="Pivot (Node3D)" type="Node3D" parent="CharacterBody3D" unique_id=1360460430]
+[node name="Pivot (Node3D)" type="Node3D" parent="Player" unique_id=1360460430]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
 
-[node name="SpringArm3D" type="SpringArm3D" parent="CharacterBody3D/Pivot (Node3D)" unique_id=998308405]
+[node name="SpringArm3D" type="SpringArm3D" parent="Player/Pivot (Node3D)" unique_id=998308405]
 spring_length = 4.0
 
-[node name="Camera3D" type="Camera3D" parent="CharacterBody3D/Pivot (Node3D)/SpringArm3D" unique_id=595426671]
+[node name="Camera3D" type="Camera3D" parent="Player/Pivot (Node3D)/SpringArm3D" unique_id=595426671]
 transform = Transform3D(1, 0, 0, 0, 0.82808965, 0.5605957, 0, -0.5605957, 0.82808965, 0, 0, 0)
 current = true
+
+[node name="Area3D" type="Area3D" parent="Player" unique_id=1253625188]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.96475595, 0, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Player/Area3D" unique_id=2138619534]
 
 [node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=1537700571]
 transform = Transform3D(10, 0, 0, 0, 10, 0, 0, 0, 10, 0, 0, 0)
