@@ -41,11 +41,23 @@ enum PlayerState{
 }
 
 @onready var pivot = $"Pivot (Node3D)"
+@onready var melee_hitbox = $"MeleeHitbox"
 
 var current_movement_state = PlayerState.IDLE
 
 func _ready():
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	melee_hitbox.monitoring = false
+	melee_hitbox.area_entered.connect(_on_melee_hitbox_area_entered)
+	
+func _on_melee_hitbox_area_entered(area):
+	if attack_phase != AttackPhase.ACTIVE:
+		return
+	if area.is_in_group("enemy_hurtbox"):
+		var enemy = area.get_parent()
+		if enemy.has_method("take_damage"):
+			enemy.take_damage(10)
+			
 	
 func _unhandled_input(event):
 	if event is InputEventMouseMotion:
@@ -124,17 +136,46 @@ func handle_fall_state(delta):
 		velocity.y -= GRAVITY * delta
 	else:
 		current_movement_state = PlayerState.IDLE
-enum AttackType{
-	LIGHT,
-	HEAVY,
-	CHARGED
-}
-var current_attack_state = AttackType.LIGHT
-func handle_attack_state(delta):
-	match current_attack_state:
-		AttackType.LIGHT:
-			
 
+enum AttackPhase{
+	IDLE,
+	WINDUP,
+	ACTIVE,
+	RECOVERY
+}
+
+func activate_hitbox():
+	melee_hitbox.monitoring = true
+	print("Hitbox On")
+func deactivate_hitbox():
+	melee_hitbox.monitoring = false
+	print("Hitbox Off")
+	
+var attack_phase = AttackPhase.IDLE
+var attack_timer = 0.0
+func handle_attack_state(delta):
+	match attack_phase:
+		AttackPhase.IDLE:
+			if Input.is_action_just_pressed("light attack"):
+				attack_phase = AttackPhase.WINDUP
+				attack_timer = 0.2
+		AttackPhase.WINDUP:
+			attack_timer -= delta
+			if attack_timer <= 0.0:
+				attack_phase = AttackPhase.ACTIVE
+				attack_timer = 0.1
+				activate_hitbox()
+		AttackPhase.ACTIVE:
+			attack_timer -= delta
+			if attack_timer <= 0:
+				deactivate_hitbox()
+				attack_timer = 0.3
+				attack_phase = AttackPhase.RECOVERY
+		AttackPhase.RECOVERY:
+			attack_timer -= delta
+			if attack_timer <= 0:
+				attack_phase = AttackPhase.IDLE
+			
 func _physics_process(delta):
 	if Input.is_action_just_pressed("close"):
 		get_tree().quit()
