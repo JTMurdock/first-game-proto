@@ -1,10 +1,14 @@
 [gd_scene format=3 uid="uid://nggbowvcy8st"]
 
 [ext_resource type="Script" uid="uid://c7qhn6xpym4vl" path="res://character_body_3d.gd" id="1_a202f"]
+[ext_resource type="Script" uid="uid://dx2ys062ypxah" path="res://attack_dummy.gd" id="2_noarx"]
+[ext_resource type="Script" uid="uid://0w2m8rh1er6h" path="res://attacking_dummy.gd" id="3_a0tk4"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_a202f"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_r3fl7"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_a0tk4"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_noarx"]
 
@@ -27,21 +31,33 @@ data = PackedVector3Array(0, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0, 0.5, 
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_jka67"]
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_noarx"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_noarx"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_a0tk4"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_r3fl7"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_r3fl7"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_a0tk4"]
+
 [node name="Node3D" type="Node3D" unique_id=462300862]
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=356333674]
 transform = Transform3D(0.012296052, -0.9995757, 0.026402643, 0.42199627, 0.029125461, 0.9061296, -0.90651417, 0, 0.42217535, 0, 7.089134, 0)
 
 [node name="Player" type="CharacterBody3D" parent="." unique_id=1768421667]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.838, 0.2, -1)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.838, 1.965193, 0.756439)
 script = ExtResource("1_a202f")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Player" unique_id=1522458242]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0)
 shape = SubResource("CapsuleShape3D_a202f")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Player" unique_id=1588832735]
 mesh = SubResource("CapsuleMesh_r3fl7")
+surface_material_override/0 = SubResource("StandardMaterial3D_a0tk4")
 
 [node name="Pivot (Node3D)" type="Node3D" parent="Player" unique_id=1360460430]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
@@ -59,16 +75,22 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.96475595, 0, 0)
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Player/Area3D" unique_id=2138619534]
 
 [node name="MeleeHitbox" type="Area3D" parent="Player" unique_id=559152454]
+transform = Transform3D(0.2626777, 0, 0.96488357, 0, 1, 0, -0.96488357, 0, 0.2626777, 0, 0, 0)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Player/MeleeHitbox" unique_id=136781712]
-transform = Transform3D(0.009825588, 2.9994206, 0, -0.49990344, 0.05895353, 0, 0, 0, 2, 1.1071992, 0.023697853, 0)
+transform = Transform3D(0.009335162, 2.8497086, 0.6239735, -0.4999035, 0.058953535, 0, -0.0030654531, -0.9357792, 1.9001733, 1.0070279, 0.023697853, -0.36795473)
 shape = SubResource("BoxShape3D_noarx")
+
+[node name="PlayerHurtbox" type="Area3D" parent="Player" unique_id=1928890496 groups=["player_hurtbox"]]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Player/PlayerHurtbox" unique_id=167213147]
+shape = SubResource("CapsuleShape3D_a202f")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=1537700571]
 transform = Transform3D(10, 0, 0, 0, 10, 0, 0, 0, 10, 0, 0, 0)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D" unique_id=1623714833]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.040850997, -0.12666321, 0.056531668)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.041, 0, 0.057)
 mesh = SubResource("BoxMesh_noarx")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" unique_id=333669238]
@@ -85,7 +107,7 @@ transform = Transform3D(3, 0, 0, 0, 15, 0, 0, 0, 3, 10.734228, 0, 0)
 shape = SubResource("CylinderShape3D_noarx")
 
 [node name="Column 2" type="StaticBody3D" parent="." unique_id=1623851796]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -52.94896, 0, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -52.94896, 12.385107, 0)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Column 2" unique_id=761879602]
 transform = Transform3D(3, 0, 0, 0, 15, 0, 0, 0, 3, 10.776413, 0, 0)
@@ -96,7 +118,7 @@ transform = Transform3D(3, 0, 0, 0, 15, 0, 0, 0, 3, 10.734228, 0, 0)
 shape = SubResource("CylinderShape3D_noarx")
 
 [node name="Pyramid1" type="StaticBody3D" parent="." unique_id=1939722947]
-transform = Transform3D(0.3050305, 0, 0.95234257, 0, 1, 0, -0.95234257, 0, 0.3050305, -19.897549, 0, 17.180204)
+transform = Transform3D(0.3050305, 0, 0.95234257, 0, 1, 0, -0.95234257, 0, 0.3050305, -19.897549, 5.3420143, 17.180204)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Pyramid1" unique_id=1988144888]
 transform = Transform3D(10, 0, 2.3841858e-07, 0, 10, 0, -2.3841858e-07, 0, 10, -9.401087, 0, 3.0111208)
@@ -107,10 +129,34 @@ transform = Transform3D(10, 0, 2.3841858e-07, 0, 10, 0, -2.3841858e-07, 0, 10, -
 shape = SubResource("ConcavePolygonShape3D_noarx")
 
 [node name="AttackDummy" type="CharacterBody3D" parent="." unique_id=289100303]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.386, 0.24812669, -1.761)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.386, 1.8190439, -1.761)
+script = ExtResource("2_noarx")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="AttackDummy" unique_id=1516275421]
 shape = SubResource("CapsuleShape3D_r3fl7")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="AttackDummy" unique_id=1059667617]
 mesh = SubResource("CapsuleMesh_jka67")
+surface_material_override/0 = SubResource("StandardMaterial3D_noarx")
+
+[node name="Area3D" type="Area3D" parent="AttackDummy" unique_id=1448468683 groups=["enemy_hurtbox"]]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="AttackDummy/Area3D" unique_id=2143443192]
+shape = SubResource("CapsuleShape3D_noarx")
+
+[node name="AttackingDummy" type="CharacterBody3D" parent="." unique_id=935787344]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, -13.772865)
+script = ExtResource("3_a0tk4")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="AttackingDummy" unique_id=146194003]
+mesh = SubResource("SphereMesh_a0tk4")
+surface_material_override/0 = SubResource("StandardMaterial3D_r3fl7")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="AttackingDummy" unique_id=1689721664]
+shape = SubResource("SphereShape3D_r3fl7")
+
+[node name="AttackBox" type="Area3D" parent="AttackingDummy" unique_id=663319121]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="AttackingDummy/AttackBox" unique_id=1077671502]
+transform = Transform3D(4, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, 0)
+shape = SubResource("SphereShape3D_a0tk4")
