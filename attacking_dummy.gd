@@ -32,14 +32,14 @@ func handle_enemy_attack_state(delta):
 			if ATTACK_TIMER <= 0:
 				ATTACK_TIMER = 0.2
 				parry_window(delta)
-				activate_hitbox()
+				attack_hitbox.activate()
 				current_attack_state = EnemyAttackState.ACTIVE
 			else:
 				ATTACK_TIMER -= delta
 		EnemyAttackState.ACTIVE:
 			if ATTACK_TIMER <= 0:
 				ATTACK_TIMER = 0.2
-				deactivate_hitbox()
+				attack_hitbox.deactivate()
 				current_attack_state = EnemyAttackState.RECOVERY
 			else:
 				ATTACK_TIMER -= delta
@@ -57,24 +57,6 @@ func handle_enemy_attack_state(delta):
 				
 func _ready():
 	original_material = mesh.get_active_material(0).duplicate()
-	attack_hitbox.monitoring = false
-	attack_hitbox.area_entered.connect(on_attack_hitbox_area_entered)
-
-func on_attack_hitbox_area_entered(area):
-	if current_attack_state != EnemyAttackState.ACTIVE:
-		return
-	if area.is_in_group("player_hurtbox"):
-		var player = area.get_parent()
-		if player.has_method("take_damage"):
-			player.take_damage(ATTACK_DMG)
-			
-func activate_hitbox():
-	attack_hitbox.monitoring = true
-	print("Attack dummy hitbox active")
-func deactivate_hitbox():
-	attack_hitbox.monitoring = false
-	print("Attack dummy hitbox deactive")
-		
 	
 func _physics_process(delta: float) -> void:
 	# Add the gravity.

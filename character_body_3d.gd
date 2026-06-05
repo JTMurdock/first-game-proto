@@ -9,10 +9,13 @@ const DASH_DURATION = 0.12
 const DASH_COOLDOWN = 0.5
 const LIGHT_ATTACK_DMG = 10.0
 const HEAVY_ATTACK_DMG = 40.0
+const PARRY_WINDOW = 0.3
 var dash_timer = 0.0
 var dash_cooldown_left = 0.0
 var dash_direction = Vector3.ZERO
 var health = 100
+var parrying = false
+var parry_cooldown = 0.0
 
 func get_input_direction(delta):
     var input_dir = Vector3.ZERO
@@ -50,20 +53,6 @@ var current_movement_state = PlayerState.IDLE
 
 func _ready():
     Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-    melee_hitbox.monitoring = false
-    melee_hitbox.area_entered.connect(on_melee_hitbox_area_entered)
-    
-func on_melee_hitbox_area_entered(area):
-    if attack_phase != AttackPhase.LIGHT_ACTIVE and attack_phase != AttackPhase.HEAVY_ACTIVE:
-        return
-    if area.is_in_group("enemy_hurtbox"):
-        var enemy = area.get_parent()
-        if enemy.has_method("take_damage"):
-            if attack_phase == AttackPhase.LIGHT_ACTIVE:
-                enemy.take_damage(LIGHT_ATTACK_DMG)
-            elif attack_phase == AttackPhase.HEAVY_ACTIVE:
-                enemy.take_damage(HEAVY_ATTACK_DMG)
-            
     
 func _unhandled_input(event):
     if event is InputEventMouseMotion:
@@ -152,13 +141,6 @@ enum AttackPhase{
     RECOVERY
 }
 
-func activate_hitbox():
-    melee_hitbox.monitoring = true
-    print("Hitbox On")
-func deactivate_hitbox():
-    melee_hitbox.monitoring = false
-    print("Hitbox Off")
-    
 var attack_phase = AttackPhase.IDLE
 var attack_timer = 0.0
 func handle_attack_state(delta):
@@ -175,22 +157,22 @@ func handle_attack_state(delta):
             if attack_timer <= 0.0:
                 attack_phase = AttackPhase.LIGHT_ACTIVE
                 attack_timer = 0.1
-                activate_hitbox()
+                melee_hitbox.activate(LIGHT_ATTACK_DMG)
         AttackPhase.HEAVY_WINDUP:
             attack_timer -= delta
             if attack_timer <= 0:
                 attack_phase = AttackPhase.HEAVY_ACTIVE
-                activate_hitbox()
+                melee_hitbox.activate(HEAVY_ATTACK_DMG)
         AttackPhase.LIGHT_ACTIVE:
             attack_timer -= delta
             if attack_timer <= 0:
-                deactivate_hitbox()
+                melee_hitbox.deactivate()
                 attack_timer = 0.1
                 attack_phase = AttackPhase.RECOVERY
         AttackPhase.HEAVY_ACTIVE:
             attack_timer -= delta
             if attack_timer <= 0:
-                deactivate_hitbox()
+                melee_hitbox.deactivate()
                 attack_timer = 0.1
                 attack_phase = AttackPhase.RECOVERY
         AttackPhase.RECOVERY:
@@ -200,13 +182,35 @@ func handle_attack_state(delta):
 func take_damage(dmg):
     health -= dmg
     print("Current player health: " + str(health))
-            
+
+func handle_parry(delta):
+    if parry_cooldown > 0:
+        parry_cooldown -= delta
+    if Input.is_action_just_pressed("parry") and parry_cooldown <= 0:
+        parry_cooldown = 0.3
+        attack_timer = PARRY_WINDOW
+        parrying = true
+        parry(delta)
+        print("Player parries")
+    if parrying:
+        parry(delta)
+        
+        
+func parry(delta):
+    attack_timer -= delta
+    
+    if attack_timer <= 0:
+        parrying = false
+        attack_phase = AttackPhase.IDLE
+    
+          
 func _physics_process(delta):
     if Input.is_action_just_pressed("close"):
         get_tree().quit()
     var movement_direction = get_input_direction(delta)
     handle_movement_state(delta, movement_direction)
     handle_attack_state(delta)
+    handle_parry(delta)
     
     if dash_cooldown_left > 0.0:
         dash_cooldown_left -= delta

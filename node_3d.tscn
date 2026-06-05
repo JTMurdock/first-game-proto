@@ -2,7 +2,9 @@
 
 [ext_resource type="Script" uid="uid://c7qhn6xpym4vl" path="res://character_body_3d.gd" id="1_a202f"]
 [ext_resource type="Script" uid="uid://dx2ys062ypxah" path="res://attack_dummy.gd" id="2_noarx"]
+[ext_resource type="Script" uid="uid://bd6tikj1rhjpw" path="res://melee_hitbox.gd" id="2_r3fl7"]
 [ext_resource type="Script" uid="uid://0w2m8rh1er6h" path="res://attacking_dummy.gd" id="3_a0tk4"]
+[ext_resource type="Script" uid="uid://dt3tjakupaydb" path="res://attack_box.gd" id="5_jka67"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_a202f"]
 
@@ -76,6 +78,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.96475595, 0, 0)
 
 [node name="MeleeHitbox" type="Area3D" parent="Player" unique_id=559152454]
 transform = Transform3D(0.2626777, 0, 0.96488357, 0, 1, 0, -0.96488357, 0, 0.2626777, 0, 0, 0)
+script = ExtResource("2_r3fl7")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Player/MeleeHitbox" unique_id=136781712]
 transform = Transform3D(0.009335162, 2.8497086, 0.6239735, -0.4999035, 0.058953535, 0, -0.0030654531, -0.9357792, 1.9001733, 1.0070279, 0.023697853, -0.36795473)
@@ -156,6 +159,7 @@ surface_material_override/0 = SubResource("StandardMaterial3D_r3fl7")
 shape = SubResource("SphereShape3D_r3fl7")
 
 [node name="AttackBox" type="Area3D" parent="AttackingDummy" unique_id=663319121]
+script = ExtResource("5_jka67")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="AttackingDummy/AttackBox" unique_id=1077671502]
 transform = Transform3D(4, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, 0)
