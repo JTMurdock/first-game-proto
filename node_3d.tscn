@@ -147,7 +147,7 @@ surface_material_override/0 = SubResource("StandardMaterial3D_noarx")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="AttackDummy/Area3D" unique_id=2143443192]
 shape = SubResource("CapsuleShape3D_noarx")
 
-[node name="AttackingDummy" type="CharacterBody3D" parent="." unique_id=935787344]
+[node name="AttackingDummy" type="CharacterBody3D" parent="." unique_id=935787344 groups=["enemies"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, -13.772865)
 script = ExtResource("3_a0tk4")
 

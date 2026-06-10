@@ -9,13 +9,14 @@ const DASH_DURATION = 0.12
 const DASH_COOLDOWN = 0.5
 const LIGHT_ATTACK_DMG = 10.0
 const HEAVY_ATTACK_DMG = 40.0
-const PARRY_WINDOW = 0.3
+const PARRY_WINDOW = 0.5
 var dash_timer = 0.0
 var dash_cooldown_left = 0.0
 var dash_direction = Vector3.ZERO
 var health = 100
 var parrying = false
 var parry_cooldown = 0.0
+var free_mouse_mode = false
 
 func get_input_direction(delta):
     var input_dir = Vector3.ZERO
@@ -55,11 +56,25 @@ func _ready():
     Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
     
 func _unhandled_input(event):
+    if free_mouse_mode:
+        return
+    
     if event is InputEventMouseMotion:
         rotate_y(-event.relative.x * MOUSE_SENSITIVITY)
         pivot.rotate_x(-event.relative.y * MOUSE_SENSITIVITY)
         
         pivot.rotation.x = clamp(pivot.rotation.x, deg_to_rad(-40), deg_to_rad(60) )
+       
+func handle_debug_inputs():
+    if Input.is_action_just_pressed("KEY_CTRL") and free_mouse_mode == false:
+        free_mouse_mode = true
+    elif Input.is_action_just_pressed("KEY_CTRL") and free_mouse_mode == true:
+        free_mouse_mode = false
+    
+    if free_mouse_mode:
+        Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+    else:
+        Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 
 func handle_movement_state(delta, direction):
     match current_movement_state:
@@ -187,17 +202,20 @@ func handle_parry(delta):
     if parry_cooldown > 0:
         parry_cooldown -= delta
     if Input.is_action_just_pressed("parry") and parry_cooldown <= 0:
-        parry_cooldown = 0.3
+        parry_cooldown = 0.5
         attack_timer = PARRY_WINDOW
         parrying = true
-        parry(delta)
-        print("Player parries")
+        print("Player attempts a deflect")
     if parrying:
         parry(delta)
         
         
 func parry(delta):
     attack_timer -= delta
+    var enemies = get_tree().get_nodes_in_group("enemies")
+    for enemy in enemies:
+        if enemy.has_method("try_parry"):
+            enemy.try_parry(self)
     
     if attack_timer <= 0:
         parrying = false
@@ -210,6 +228,7 @@ func _physics_process(delta):
     var movement_direction = get_input_direction(delta)
     handle_movement_state(delta, movement_direction)
     handle_attack_state(delta)
+    handle_debug_inputs()
     handle_parry(delta)
     
     if dash_cooldown_left > 0.0:
